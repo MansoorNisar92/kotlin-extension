@@ -1,0 +1,80 @@
+apply plugin: 'maven-publish'
+
+static def isReleaseBuild() {
+    return false
+}
+
+def getOutputDir() {
+    if (isReleaseBuild()) {
+        return "${project.buildDir}/releases"
+    } else {
+        return "${project.buildDir}/snapshots"
+    }
+}
+
+def getArtifactFilePath() {
+    if (isReleaseBuild()) {
+        return "$buildDir/outputs/aar/${artifactId}-release.aar"
+    } else {
+        return "$buildDir/outputs/aar/${artifactId}-debug.aar"
+    }
+}
+
+def getPublicationName() {
+    if (isReleaseBuild()) {
+        return "release"
+    } else {
+        return "debug"
+    }
+}
+
+publishing {
+    publications {
+        debug(MavenPublication) {
+            groupId group // com.company.project
+            artifactId artifactId // my-component-library
+            version version // 1.0.0-SNAPSHOT
+            artifact "$buildDir/outputs/aar/${artifactId}-debug.aar"
+
+            // To include project dependencies
+            pom.withXml {
+                def dependencies = asNode().appendNode('dependencies')
+                configurations.getByName("${getPublicationName()}CompileClasspath").getResolvedConfiguration().getFirstLevelModuleDependencies().each {
+                    def dependency = dependencies.appendNode('dependency')
+                    dependency.appendNode('groupId', it.moduleGroup)
+                    dependency.appendNode('artifactId', it.moduleName)
+                    dependency.appendNode('version', it.moduleVersion)
+                }
+            }
+        }
+        release(MavenPublication) {
+            groupId group // com.company.project
+            artifactId artifactId // my-component-library
+            version version // 1.0.0-SNAPSHOT
+            artifact "$buildDir/outputs/aar/${artifactId}-release.aar"
+
+            // To include project dependencies
+            pom.withXml {
+                def dependencies = asNode().appendNode('dependencies')
+                configurations.getByName("${getPublicationName()}CompileClasspath").getResolvedConfiguration().getFirstLevelModuleDependencies().each {
+                    def dependency = dependencies.appendNode('dependency')
+                    dependency.appendNode('groupId', it.moduleGroup)
+                    dependency.appendNode('artifactId', it.moduleName)
+                    dependency.appendNode('version', it.moduleVersion)
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "https://gitlab.com/api/v4/projects/${projectId}/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name = "Private-Token"
+                value = gitLabPrivateToken
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+    }
+}

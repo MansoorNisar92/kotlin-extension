@@ -1,0 +1,19 @@
+<lint-module
+    format="1"
+    dir="/Users/target/Documents/extensions-module/app"
+    name=":app"
+    type="APP"
+    maven="com.target.extensions:app:"
+    gradle="7.1.2"
+    buildFolder="build"
+    bootClassPath="/Users/target/Library/Android/sdk/platforms/android-32/android.jar:/Users/target/Library/Android/sdk/build-tools/30.0.3/core-lambda-stubs.jar"
+    javaSourceLevel="1.8"
+    compileTarget="android-32"
+    neverShrinking="true">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="debug"/>
+</lint-module>
